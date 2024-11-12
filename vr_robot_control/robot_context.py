@@ -7,37 +7,21 @@ from mujoco_robot_control.robot_env import RobotEnv
 from vr_robot_control.hand_pose_reader import HandPoseReader
 from scipy.spatial.transform import Rotation as R
 import time
-from ns_interface import command
-from ns_interface import feedback
-import ns_interface
-
 
 class RobotController:
     def __init__(self, args):
 
         self.unlocked_joints = [
-            "right_shoulder_fe",
-            "right_shoulder_aa",
-            "right_shoulder_ie",
-            "right_elbow_fe",
-            "right_elbow_ie",
-            "right_wrist_fe",
-            "right_wrist_aa",
-            # "left_shoulder_fe",
-            # "left_shoulder_aa",
-            # "left_shoulder_ie",
-            # "left_elbow_fe",
-            # "left_elbow_ie",
-            # "left_wrist_fe",
-            # "left_wrist_aa",
-            # "torso_aa",
-            # "torso_ie",
-            # "torso_fe_a",
-            # "torso_fe_b",
-            # "neck_ie",
-            # "neck_aa",
-            # "neck_fe",
-        ]
+        # "torso",
+        # "left_shoulder_pitch",
+        # "left_shoulder_roll",
+        # "left_shoulder_yaw",
+        # "left_elbow",
+        "right_shoulder_pitch",
+        "right_shoulder_roll",
+        "right_shoulder_yaw",
+        "right_elbow",
+    ]
 
         # Mujoco Robot Environment
         self.env = RobotEnv(
@@ -55,14 +39,9 @@ class RobotController:
         self.weight = np.array([10.0, 10.0, 10.0, 5.0, 5.0, 5.0])
 
         # End-effector we wish to control.
-        self.left_frame_name = "left_hand_tracker_link"
-        self.right_frame_name = "right_hand_tracker_link"
+        self.left_frame_name = "end_effector"
 
         self.env.set_timestep(0.01)
-
-        # NS Interface
-        ns_interface.init(args.config_path)
-        command.start_tracking(self.unlocked_joints)
 
         self.is_trigger_button_pressed = False
         self.trigger_button_previous = False
@@ -96,7 +75,6 @@ class RobotController:
             if self.is_trigger_button_pressed == True:
                 # print("Publishing joint points")
                 time.sleep(0.01)
-                command.send_tracking_point(self.unlocked_joints, qpos)
 
     def update_tracker_data(self, tracker_names: list):
         """
@@ -140,20 +118,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--urdf_path",
         type=str,
-        default="mujoco_robot_control/src/mujoco_robot_control/assets/phoenix/urdfs/gpr-gen8.1/scene.xml",
+        default="robot_task_space_control\mujoco_robot_control\assets\unitree_h1\scene.xml",
         help="Path to the urdf file",
-    )
-    parser.add_argument(
-        "--trajectory_path",
-        type=str,
-        default="src/mujoco_robot_control/trajecotries/chicken_head.csv",
-        help="Path to the trajectory file",
-    )
-    parser.add_argument(
-        "--config_path",
-        type=str,
-        default="vr_robot_control/config/config_torso.yml",
-        help="Path to the config file",
     )
     args = parser.parse_args()
 
